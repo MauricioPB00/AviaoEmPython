@@ -1,0 +1,288 @@
+from random import Random
+from time import time
+from inspyred import ec
+from inspyred.ec import terminators
+import numpy as np
+
+# Gera populacao
+def generate_(random, args):
+    size = args.get("num_inputs", 12)
+    return [random.randint(0, 16000) for i in range(size)] 
+
+
+# Avalia solucao
+def evaluate_(candidates, args):
+    fitness = []
+    for op in candidates:
+        fit = perform_fitness(op[0], op[1], op[2], op[3], op[4],
+                              op[5], op[6], op[7], op[8], op[9], op[10], op[11])
+        fitness.append(fit)
+    return fitness
+
+# Função de fitness um pra um 
+def perform_fitness(carga1_F, carga1_M, carga1_A, carga2_F, carga2_M, carga2_A, carga3_F, carga3_M, carga3_A, carga4_F, carga4_M, carga4_A):
+
+    carga1_F = np.round(carga1_F)  # frente
+    carga1_M = np.round(carga1_M)  # meio
+    carga1_A = np.round(carga1_A)  # atras
+
+    carga2_F = np.round(carga2_F)  # frente
+    carga2_M = np.round(carga2_M)  # meio
+    carga2_A = np.round(carga2_A)  # atras
+
+    carga3_F = np.round(carga3_F)  # frente
+    carga3_M = np.round(carga3_M)  # meio
+    carga3_A = np.round(carga3_A)  # atras
+
+    carga4_F = np.round(carga4_F)  # frente
+    carga4_M = np.round(carga4_M)  # meio
+    carga4_A = np.round(carga4_A)  # atras
+
+    lucro_max = 22750
+    num_aux = 13
+
+    fit = float(((0.310 * carga1_F + 0.310 * carga1_M + 0.310 * carga1_A) +
+                (0.380 * carga2_F + 0.380 * carga2_M + 0.380 * carga2_A) +
+                (0.350 * carga3_F + 0.350 * carga3_M + 0.350 * carga3_A) +
+                (0.285 * carga4_F + 0.285 * carga4_M + 0.285 * carga4_A)) / lucro_max)
+
+
+
+    # Peso maximo
+
+    # Frente
+    aux1 = np.maximum(0, float((carga1_F + carga2_F + carga3_F +
+                    carga4_F) - 10000)) / float(10000 / num_aux)  
+
+    # Meio
+    aux2 = np.maximum(0, float(
+        (carga1_M + carga2_M + carga3_M + carga4_M) - 16000)) / float(16000 / num_aux) 
+
+    # Atras
+    aux3 = np.maximum(0, float((carga1_A + carga2_A + carga3_A + carga4_A) - 8000)
+                    ) / float(8000 / num_aux)
+
+    # Volume Maximo
+
+    # Frente
+    aux4 = np.maximum(0, float((0.480 * carga1_F + 0.650 * carga2_F +
+                    0.580 * carga3_F + 0.390 * carga4_F) - 6800)) / float(6800 / num_aux)  
+
+    # Meio
+    aux5 = np.maximum(0, float((0.480 * carga1_M + 0.650 * carga2_M +
+                    0.580 * carga3_M + 0.390 * carga4_M) - 8700)) / float(8700 / num_aux) 
+
+    # Atras
+    aux6 = np.maximum(0, float((0.48 * carga1_A + 0.65 * carga2_A +
+                    0.58 * carga3_A + 0.39 * carga4_A) - 5300)) / float(5300 / num_aux) 
+
+
+    # Volume Maximo Aviao
+    peso_max = 34000 
+  
+    carga_dianteira = float(carga1_F + carga2_F + carga3_F + carga4_F)
+    carga_meio = float(carga1_M + carga2_M + carga3_M + carga4_M)
+    carga_traseira = float(carga1_A + carga2_A + carga3_A + carga4_A)
+    soma_total_cargas = float(carga_dianteira + carga_meio + carga_traseira)
+
+
+    # Maximo peso por proporção
+    # Frente Maximo
+    aux7 = np.maximum(0, float((carga_dianteira / soma_total_cargas) - (10000 / peso_max))
+                    ) / float((10000 / peso_max)  / num_aux)
+    
+    # Meio Maximo
+    aux8 = np.maximum(0, float((carga_meio / soma_total_cargas) -
+                              (16000 / peso_max))) / float((16000 / peso_max) / num_aux) 
+
+    # Atras Maximo
+    aux9 = np.maximum(0, float((carga_traseira / soma_total_cargas) -
+                    (8000 / peso_max))) / float((8000 / peso_max) / num_aux)
+
+
+    # Maximo de peso por carga
+    # Carga 1 Maximo
+    aux10 = np.maximum(0, float((carga1_F + carga1_M + carga1_A) - 18000)
+                     ) / float(18000 / num_aux) 
+    # Carga 2 Maximo
+    aux11 = np.maximum(0, float((carga2_F + carga2_M + carga2_A) - 15000)
+                     ) / float(15000 / num_aux)
+    # Carga 3 Maximo
+    aux12 = np.maximum(0, float((carga3_F + carga3_M + carga3_A) - 23000)
+                     ) / float(23000 / num_aux) 
+    # Carga 4 Maximo
+    aux13 = np.maximum(0, float((carga4_F + carga4_M + carga4_A) - 12000)
+                     ) / float(12000 / num_aux)
+
+    fit = fit - (aux1 + aux2 + aux3 + aux4 + aux5 + aux6 + aux7 +
+                 aux8 + aux9 + aux10 + aux11 + aux12 + aux13)
+
+    return fit
+
+
+def solution_evaluation(carga1_F, carga1_M, carga1_A, carga2_F, carga2_M, carga2_A, carga3_F, carga3_M, carga3_A, carga4_F, carga4_M, carga4_A):
+    # Arredonda
+    carga1_F = np.round(carga1_F)  # frente
+    carga1_M = np.round(carga1_M)  # meio
+    carga1_A = np.round(carga1_A)  # atras
+
+    carga2_F = np.round(carga2_F)  # frente
+    carga2_M = np.round(carga2_M)  # meio
+    carga2_A = np.round(carga2_A)  # atras
+
+    carga3_F = np.round(carga3_F)  # frente
+    carga3_M = np.round(carga3_M)  # meio
+    carga3_A = np.round(carga3_A)  # atras
+
+    carga4_F = np.round(carga4_F)  # frente
+    carga4_M = np.round(carga4_M)  # meio
+    carga4_A = np.round(carga4_A)  # atras
+
+    compartimento_frente = carga1_F + carga2_F + carga3_F + carga4_F
+    compartimento_meio = carga1_M + carga2_M + carga3_M + carga4_M
+    compartimento_atras = carga1_A + carga2_A + carga3_A + carga4_A
+    total = compartimento_frente + compartimento_meio + compartimento_atras
+ 
+    print("\n ======================= \n")
+    print("\n [ PESO INDIVIDUAL ] \n")
+
+    print("FRENTE 1:", carga1_F)
+    print("MEIO 1:", carga1_M)
+    print("ATRAS 1:", carga1_A)
+    total_carga1 = float(carga1_F + carga1_M + carga1_A)
+    print("# TOTAL CARGA 1 #", (total_carga1))
+
+    print("\nFRENTE 2:", carga2_F)
+    print("MEIO 2:", carga2_M)
+    print("ATRAS 2:", carga2_A)
+    total_carga2 = float(carga2_F + carga2_M + carga2_A)
+    print("# TOTAL CARGA 2 #", (total_carga2))
+
+    print("\nFRENTE 3:", carga3_F)
+    print("MEIO 3:", carga3_M)
+    print("ATRAS 3:", carga3_A)
+    total_carga3 = float(carga3_F + carga3_M + carga3_A)
+    print("# TOTAL CARGA 3 #", (total_carga3))
+
+    print("\nFRENTE 4:", carga4_F)
+    print("MEIO 4:", carga4_M)
+    print("ATRAS 4:", carga4_A)
+    total_carga4 = float(carga4_F + carga4_M + carga4_A)
+    print("# TOTAL CARGA 4 #", (total_carga4))
+
+    cargas_total = float(total_carga1 + total_carga2 +
+                         total_carga3 + total_carga4)
+
+    print("\n[ PESO TOTAL ]: ", cargas_total)
+
+    print("\n- FRENTE TOTAL:", carga1_F + carga2_F + carga3_F + carga4_F)
+    print("- MEIO TOTAL :", carga1_M + carga2_M + carga3_M + carga4_M)
+    print("- ATRAS TOTAL:", carga1_A + carga2_A + carga3_A + carga4_A)
+
+    print("\n ======================= \n")
+
+    # PESO x VOLUME
+    volume_frente = float(
+        (carga1_F * 0.480)+(carga2_F * 0.650) +
+        (carga3_F * 0.580) + (carga4_F * 0.390))
+    volume_meio = float(
+        (carga1_M * 0.480) + (carga2_M * 0.650) + 
+        (carga3_M * 0.580) + (carga4_M * 0.390))
+    volume_atras = float(
+        (carga1_A * 0.480)+(carga2_A * 0.650) +
+        (carga3_A * 0.580) + (carga4_A * 0.390))
+
+    print("\n [ VOLUME INDIVIDUAL ]")
+    print("- FRENTE TOTAL : ", volume_frente)
+    print("- MEIO TOTAL : ", volume_meio)
+    print("- ATRAS TOTAL : ", volume_atras)
+
+    print("\n ======================= \n")
+
+    print("\n [PROPORCAO ] ")
+    print("FRENTE: ", round(
+        ((carga1_F + carga2_F + carga3_F + carga4_F) / cargas_total),3))
+    print("MEIO: ", round(
+        ((carga1_M + carga2_M + carga3_M + carga4_M) / cargas_total),3))
+    print("ATRAS: ", round(
+        ((carga1_A + carga2_A + carga3_A + carga4_A) / cargas_total),3))
+
+    lucro_carga1 = float(0.310 * carga1_F + 0.310 * carga1_M + 0.310 * carga1_A)
+    lucro_carga2 = float(0.380 * carga2_F + 0.380 * carga2_M + 0.380 * carga2_A)
+    lucro_carga3 = float(0.350 * carga3_F + 0.350 * carga3_M + 0.350 * carga3_A)
+    lucro_carga4 = float(0.285 * carga4_F + 0.285 * carga4_M + 0.285 * carga4_A)
+
+    print("\n ======================= \n")
+
+    print("\n -[LUCROS ]")
+    print("LUCRO DA CARGA 1:", lucro_carga1)
+    print("LUCRO DA CARGA 2:", lucro_carga2)
+    print("LUCRO DA CARGA 3:", lucro_carga3)
+    print("LUCRO DA CARGA 4:", lucro_carga4)
+    print("\n[LUCRO TOTAL] ", lucro_carga1 + lucro_carga2 + lucro_carga3 + lucro_carga4)
+
+    if (((compartimento_frente/total) >= 0.3) or ((compartimento_frente/total) <= 0.29)):
+
+        print(f"frente passou: {np.round((compartimento_frente/total),4)}")
+
+    if (((compartimento_meio/total) >= 0.48) or ((compartimento_meio/total) <= 0.47)):
+        print;(f"meio passou: {np.round((compartimento_meio/total),4)}")
+
+    if (((compartimento_atras/total) >= 0.24) or ((compartimento_atras/total) <= 0.23)):
+        print(f"atras passou: {np.round((compartimento_atras/total),4)}")
+
+
+def main():
+    rand = Random()
+    rand.seed(int(time()))
+    ea = ec.GA(rand)
+    ea.selector = ec.selectors.tournament_selection  # metodo de seleção: torneio
+
+    ea.variator = [ec.variators.uniform_crossover,  # op genético crossover uniforme
+                   ec.variators.gaussian_mutation]  # op genético mutação gaussian_mutation
+
+    # determina os sobreviventes da prox geração
+    ea.replacer = ec.replacers.steady_state_replacement
+
+    # critério de parada: atingir o máx de geraçoes
+    ea.terminator = terminators.generation_termination
+
+    # geração de estatísticas da evolução
+    ea.observer = [ec.observers.stats_observer, ec.observers.file_observer]
+
+    final_pop = ea.evolve(
+                          generator=generate_,          # Função que gera a população
+                          evaluator=evaluate_,          # Função que avalia as soluções
+                          pop_size=10000,               # Tamanho da população
+                          maximize=True,                # False:minimização
+                          bounder=ec.Bounder(0, 16000),
+                          max_generations=5000,         # Qtd de gerações
+                          num_inputs=12,                # Qtd de genes (cromossomos)
+                          crossover_rate=1.0,           # Taxa de cruzamento
+                          num_crossover_points=1,       # Número de cortes do cruzamento
+                          mutation_rate=0.25,           # Taxa de mutação
+                          num_elites=1,                 # numero de individuos elites a serem
+
+                          # selecionados para a póxima população
+                          num_selected=12,              # Numero de individuos
+                          tournament_size=12,           # Torneio aletorio
+
+                          #statistcs_fize=open("plane.csv", "w"),
+                          #individuals_file=open("plane-individuals.csv", "w")
+                        )
+
+    
+
+    # Melhor população por primeiro 0 = melhor individuo
+    final_pop.sort(reverse=True)  # população final
+    print("\n [ MELHORES INDIVIDUOS] \n")
+    print(final_pop[0],"\n")
+
+    # Fitness final
+    perform_fitness(final_pop[0].candidate[0], final_pop[0].candidate[1], final_pop[0].candidate[2], final_pop[0].candidate[3], final_pop[0].candidate[4], final_pop[0].candidate[5],
+                    final_pop[0].candidate[6], final_pop[0].candidate[7], final_pop[0].candidate[8], final_pop[0].candidate[9], final_pop[0].candidate[10], final_pop[0].candidate[11])
+    solution_evaluation(final_pop[0].candidate[0], final_pop[0].candidate[1], final_pop[0].candidate[2], final_pop[0].candidate[3], final_pop[0].candidate[4], final_pop[0].candidate[5],
+                        final_pop[0].candidate[6], final_pop[0].candidate[7], final_pop[0].candidate[8], final_pop[0].candidate[9], final_pop[0].candidate[10], final_pop[0].candidate[11])
+
+
+main()
